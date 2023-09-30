@@ -257,22 +257,37 @@ class datatransform:
         X_batch_r = np.zeros((n, h, w))
         y_batch_r = np.zeros((n, h, w, self.ch))
         for i, (img, gt) in enumerate(zip(X_batch, y_batch)):
-            flip_type = np.random.randint(-1, 3)
+            flip_type = np.random.randint(-3, 4)
+            self.tracker.append(flip_type)
             if flip_type == 3 and h == w:
                 img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
                 gt = cv2.rotate(gt, cv2.ROTATE_90_CLOCKWISE)
             elif flip_type == 2 and h == w:
                 img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
                 gt = cv2.rotate(gt, cv2.ROTATE_90_COUNTERCLOCKWISE)
+            elif flip_type == -2 and h == w:
+                img = cv2.flip(img, 1)#hflip
+                img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
+                gt = cv2.flip(gt, 1)
+                gt = cv2.rotate(gt, cv2.ROTATE_90_CLOCKWISE) 
+            elif flip_type == -3 and h == w:
+                img = cv2.flip(img, 1)#hflip
+                img = cv2.rotate(img, cv2.ROTATE_90_COUNTERCLOCKWISE)
+                gt = cv2.flip(gt, 1)
+                gt = cv2.rotate(gt, cv2.ROTATE_90_COUNTERCLOCKWISE) 
+                
             else:
+                # 1 h, 0 v, -1 h+v 
                 img = cv2.flip(img, flip_type)
                 gt = cv2.flip(gt, flip_type)
+                
+                
             if len(gt.shape) != 3:
                 gt = np.expand_dims(gt, axis=2)
             X_batch_r[i] = img
             y_batch_r[i] = gt
         return X_batch_r, y_batch_r
-
+                           
     def apply_imresize(self,
                        X_batch: np.ndarray,
                        y_batch: np.ndarray) -> Tuple[np.ndarray]:
