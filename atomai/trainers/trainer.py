@@ -498,6 +498,20 @@ class BaseTrainer:
                 (appended with "_test_weights_best.pt" and "_weights_final.pt")
             **plot_training_history (bool):
                 Plots training and test curves vs epochs at the end of training
+                
+                            
+            EDITED:
+            implemented ES
+            added       weight decay(regularization)
+            
+            **ES:
+                Early stopping mode on/off
+            **paitence:
+                 paitence for early stopping
+             **tolerance:
+                 tolerance for early stopping
+            
+            
         """
         self.full_epoch = full_epoch
         self.training_cycles = training_cycles
@@ -506,6 +520,11 @@ class BaseTrainer:
         self.swa = swa
         self.lr_scheduler = kwargs.get("lr_scheduler")
         alloc = kwargs.get("memory_alloc", 4)
+        ########################################### Start of Edit ##########################################            
+        self.ES= kwargs.get("ES",True)
+        self.reg= kwargs.get("weight_decay",0)
+        ########################################### End of Edit ##########################################            
+        
 
         if self.data_is_set:
             if kwargs.get("overwrite_train_data", True):
@@ -514,6 +533,17 @@ class BaseTrainer:
                 pass
         else:
             self.set_data(*train_data, memory_alloc=alloc)
+        ########################################### Start of Edit ##########################################            
+        if self.ES:
+            self.patience=kwargs.get("patience",self.training_cycles//10)
+            self.tolerance=kwargs.get("tolerance",1e-3)
+            self.min_val_loss=sys.float_info.max
+            self.verbose=kwargs.get("verbose",False)
+            self.ES_model=None #To store Early stoppng model eventually
+            
+        ########################################### End of Edit ##########################################            
+
+        
 
         self.perturb_weights = perturb_weights
         if self.perturb_weights:
@@ -529,11 +559,20 @@ class BaseTrainer:
         if self.optimizer is None:
             if optimizer is None:
                 # will be overwitten by lr_scheduler (if activated)
-                self.optimizer = torch.optim.Adam(params, lr=1e-3)
+                ########################################### Start of Edit #########################################
+                self.optimizer = torch.optim.Adam(params, lr=1e-3, weight_decay=self.reg)
             else:
-                self.optimizer = optimizer(params)
-        if self.criterion is None:
-            self.criterion = self.get_loss_fn(loss, self.nb_classes)
+                try:
+                    self.optimizer = optimizer(params,lr=1e-3, weight_decay=self.reg)
+                except:
+                    print("Optimizer does not support Weight decay")
+                    self.optimizer = optimizer(params,lr=1e-3)
+                #self.optimizer = optimizer(params)
+            
+            
+            ########################################### End of Edit ##########################################            
+            
+        self.criterion = self.get_loss_fn(loss, self.nb_classes)
 
         if not self.full_epoch:
             r = self.training_cycles // len(self.X_train)
@@ -569,7 +608,16 @@ class BaseTrainer:
         saves the final model weights. One can also pass
         kwargs for utils.datatransform class to perform
         the data augmentation "on-the-fly"
+        
+        EDITED: Implemnted Early stopping
         """
+        ########################################### Start of Edit ########################################## 
+        
+        patience_used=0
+        
+        ########################################### End   of Edit ########################################## 
+        
+
         for e in range(self.training_cycles):
             if self.lr_scheduler is not None:
                 self.select_lr(e)
@@ -584,15 +632,46 @@ class BaseTrainer:
             if any([e == 0, (e+1) % self.print_loss == 0,
                     e == self.training_cycles-1]):
                 self.print_statistics(e)
+            ########################################## Start of Edit ########################################## 
+            if self.ES:
+                if self.min_val_loss-self.loss_acc["test_loss"][-1]>self.tolerance :
+                    self.min_val_loss=self.loss_acc["test_loss"][-1]
+                    self.ES_model=copy.deepcopy(self.net) #making a deep copy of self.nn, on whatever device self.nn is
+                    patience_used=0
+
+                    if self.verbose: 
+                        print('Updating Early stopping model @ epoch: ',e+1)
+                else:
+                    patience_used+=1
+                    if patience_used>self.patience:
+                        if self.verbose:
+                            print('EARLY STOPPING @ step: ',e+1)
+                            print('Reverting to step: ',e-self.patience+1)
+                        self.net=self.ES_model                        
+                        self.save_model(self.filename + "_metadict_final")
+                        if not self.full_epoch:
+                            self.eval_model()
+                        if self.swa:
+                            print("Performing stochastic weight averaging...")
+                            self.net.load_state_dict(average_weights(self.running_weights))
+                            self.eval_model()
+                        if self.plot_training_history:
+                            plot_losses_prag(self.loss_acc["train_loss"],
+                                        self.loss_acc["test_loss"])
+                        return self.net
+
+            ########################################### End   of Edit ########################################## 
+             
+                            
+        self.save_model(self.filename + "_metadict_final")
         if not self.full_epoch:
             self.eval_model()
         if self.swa:
             print("Performing stochastic weight averaging...")
             self.net.load_state_dict(average_weights(self.running_weights))
             self.eval_model()
-        self.save_model(self.filename + "_metadict_final")
         if self.plot_training_history:
-            plot_losses(self.loss_acc["train_loss"],
+            plot_losses_prag(self.loss_acc["train_loss"],
                         self.loss_acc["test_loss"])
         return self.net
 
