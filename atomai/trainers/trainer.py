@@ -10,7 +10,7 @@ used for training custom PyTorch neural networks
 Created by Maxim Ziatdinov (email: maxim.ziatdinov@ai4microscopy.com)
 """
 
-
+import sys #for max value
 import copy
 import warnings
 from collections import OrderedDict
