@@ -6,6 +6,9 @@ from ..predictors import SegPredictor
 from ..transforms import seg_augmentor
 from ..utils import get_downsample_factor
 
+#additional depedency:- sklearn possibly implement our own f1?
+from sklearn.metrics import f1_score
+
 
 class Segmentor(SegTrainer):
     """
@@ -57,6 +60,7 @@ class Segmentor(SegTrainer):
                  **kwargs) -> None:
         super(Segmentor, self).__init__(model, nb_classes, **kwargs)
         self.downsample_factor = None
+        self.binary_thresh= None
 
     def fit(self,
             X_train: Union[np.ndarray, torch.Tensor],
@@ -139,14 +143,24 @@ class Segmentor(SegTrainer):
                 to perform the augmentation "on-the-fly" (e.g. rotation=True,
                 gauss_noise=[20, 60], etc.)
         """
+        
+        do_auto_thresh=kwargs.get("auto_thresh",False)
         self.compile_trainer(
             (X_train, y_train, X_test, y_test),
             loss, optimizer, training_cycles, batch_size,
             compute_accuracy, full_epoch, swa, perturb_weights,
             **kwargs)
+        
 
         self.augment_fn = seg_augmentor(self.nb_classes, **kwargs)
         _ = self.run()
+        
+        if do_auto_thresh and X_test is not None and y_test is not None:
+            self.auto_thresh_predict(X_test, y_test)
+            
+            
+        
+        
 
     def predict(self,
                 imgdata: Union[np.ndarray, torch.Tensor],
@@ -192,12 +206,57 @@ class Segmentor(SegTrainer):
         if self.downsample_factor is None:
             self.downsample_factor = get_downsample_factor(self.net)
         use_gpu = self.device == 'cuda'
-        prediction = SegPredictor(
-            self.net, refine, resize, use_gpu, logits,
-            nb_classes=self.nb_classes, downsampling=self.downsample_factor,
-            **kwargs).run(imgdata, compute_coords, **kwargs)
+        ##################################start of edit#######################################################
+        if self.binary_thresh and kwargs.get('thresh', True) :
+            print('Performing auto-thresh prediction')
+            prediction = SegPredictor(
+                self.net, refine, resize, use_gpu, logits,
+                nb_classes=self.nb_classes, downsampling=self.downsample_factor,thresh=self.binary_thresh,
+                **kwargs).run(imgdata, compute_coords, **kwargs)
+            
+            class_pred = np.zeros(prediction[0].shape[:3])
+            class_pred[prediction[0][:,:,:,0] > self.binary_thresh] = 1
+            prediction=prediction + (class_pred,)
+            
+        else:
+            prediction = SegPredictor(
+                self.net, refine, resize, use_gpu, logits,
+                nb_classes=self.nb_classes, downsampling=self.downsample_factor,
+                **kwargs).run(imgdata, compute_coords, **kwargs)
+       ##################################end of edit#######################################################
+       
+        
 
         return prediction
+    
+    ##################################start of edit#######################################################
+    
+    def auto_thresh_predict(self, images_val,labels_val):
+        print('Calculating Automatic Threshold')
+        
+        pred_val = self.predict(images_val)
+        best_thresold = 0.5
+        max_f1=-1
+        thresh=[0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95]
+        for idx in range(len(thresh)):
+            print('Checking Threshold item#: ',idx+1,'/',len(thresh), end="\r")
+            
+            threshold = thresh[idx]
+            class_pred = np.zeros(pred_val[0].shape[:3])
+
+            class_pred[pred_val[0][:,:,:,0] > threshold] = 1
+
+            f_this=f1_score(labels_val.ravel(), class_pred.ravel())
+
+            if f_this>max_f1:
+                best_threso=threshold
+                max_f1=f_this
+
+        self.binary_thresh=best_threso
+   ##################################end of edit#######################################################
+        
+
+
 
     def load_weights(self, filepath: str) -> None:
         """
