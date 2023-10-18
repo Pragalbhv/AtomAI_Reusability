@@ -138,6 +138,8 @@ class Segmentor(SegTrainer):
             **plot_training_history (bool):
                 Plots training and test curves vs. training cycles
                 at the end of training
+            **auto_thresh (bool):
+                Performs automatic binary threshold selection for optimal f1-score
             **kwargs:
                 One can also pass kwargs for utils.datatransform class
                 to perform the augmentation "on-the-fly" (e.g. rotation=True,
