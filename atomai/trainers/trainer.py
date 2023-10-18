@@ -498,13 +498,13 @@ class BaseTrainer:
                 (appended with "_test_weights_best.pt" and "_weights_final.pt")
             **plot_training_history (bool):
                 Plots training and test curves vs epochs at the end of training
-            **ES:
+            **ES (bool):
                 Early stopping mode on/off
-            **patience:
+            **patience (int):
                  patience for early stopping
-            **tolerance:
+            **tolerance (float):
                  tolerance for early stopping
-            **weight_decay:
+            **weight_decay (float):
                   weight decay for model 
             
             
