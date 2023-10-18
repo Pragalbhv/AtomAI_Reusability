@@ -498,18 +498,15 @@ class BaseTrainer:
                 (appended with "_test_weights_best.pt" and "_weights_final.pt")
             **plot_training_history (bool):
                 Plots training and test curves vs epochs at the end of training
-                
-                            
-            EDITED:
-            implemented ES
-            added       weight decay(regularization)
-            
             **ES:
                 Early stopping mode on/off
-            **paitence:
-                 paitence for early stopping
-             **tolerance:
+            **patience:
+                 patience for early stopping
+            **tolerance:
                  tolerance for early stopping
+            **weight_decay:
+                  weight decay for model 
+            
             
             
         """
@@ -534,7 +531,7 @@ class BaseTrainer:
         else:
             self.set_data(*train_data, memory_alloc=alloc)
         ########################################### Start of Edit ##########################################            
-        if self.ES:
+        if self.ES and not self.swa:
             self.patience=kwargs.get("patience",self.training_cycles//10)
             self.tolerance=kwargs.get("tolerance",1e-3)
             self.min_val_loss=sys.float_info.max
