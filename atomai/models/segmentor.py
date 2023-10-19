@@ -60,7 +60,7 @@ class Segmentor(SegTrainer):
                  **kwargs) -> None:
         super(Segmentor, self).__init__(model, nb_classes, **kwargs)
         self.downsample_factor = None
-        self.binary_thresh= None
+        #self.binary_thresh= None shifted to trainer.py for saving
 
     def fit(self,
             X_train: Union[np.ndarray, torch.Tensor],
@@ -97,7 +97,7 @@ class Segmentor(SegTrainer):
                 (stacked along the first dimension)
             y_test:
                 4D (binary) / 3D (multiclass) numpy array or pytorch tensor
-                of training masks (aka ground truth) stacked along
+                of test masks (aka ground truth) stacked along
                 the first dimension.
             loss:
                 loss function. Available loss functions are: 'mse' (MSE),
@@ -140,6 +140,14 @@ class Segmentor(SegTrainer):
                 at the end of training
             **auto_thresh (bool):
                 Performs automatic binary threshold selection for optimal f1-score
+            **ES (bool):
+                Early stopping mode on/off
+            **patience (int):
+                 patience for early stopping
+            **tolerance (float):
+                 tolerance for early stopping
+            **weight_decay (float):
+                  weight decay for model 
             **kwargs:
                 One can also pass kwargs for utils.datatransform class
                 to perform the augmentation "on-the-fly" (e.g. rotation=True,
@@ -159,6 +167,7 @@ class Segmentor(SegTrainer):
         
         if do_auto_thresh and X_test is not None and y_test is not None:
             self.auto_thresh_predict(X_test, y_test)
+            self.save_model(self.filename + "_metadict_final")
             
             
         
@@ -209,7 +218,8 @@ class Segmentor(SegTrainer):
             self.downsample_factor = get_downsample_factor(self.net)
         use_gpu = self.device == 'cuda'
         ##################################start of edit#######################################################
-        if self.binary_thresh and kwargs.get('thresh', True) :
+        print(not kwargs.get('thresh', False))
+        if self.binary_thresh and not kwargs.get('thresh', False) :
             print('Performing auto-thresh prediction')
             prediction = SegPredictor(
                 self.net, refine, resize, use_gpu, logits,
@@ -234,6 +244,19 @@ class Segmentor(SegTrainer):
     ##################################start of edit#######################################################
     
     def auto_thresh_predict(self, images_val,labels_val):
+        '''
+        Performs automatic binary thresholding on validation set -> stores best threshold to model
+        
+        Args:
+            images_val:
+                4D numpy array or pytorch tensor of validation images
+                (stacked along the first dimension)
+            labels_val:
+                4D (binary) / 3D (multiclass) numpy array or pytorch tensor
+                of validation masks (aka ground truth) stacked along
+                the first dimension.
+        
+        '''
         print('Calculating Automatic Threshold')
         
         pred_val = self.predict(images_val)
