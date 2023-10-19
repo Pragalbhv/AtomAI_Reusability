@@ -52,6 +52,9 @@ def load_model(filepath: str) -> Union[Segmentor, Union[VAE, rVAE, jrVAE, jVAE],
             else:
                 raise ValueError(
                     "The model type {} cannot be loaded".format(model_type))
+            if "binary_thresh" in loaded_dict.keys():
+                model.binary_thresh=loaded_dict.pop("binary_thresh")
+            
     else:
         model = loaded_dict["weights"]
         warnings.warn("Returning model's state dictionary." +
@@ -81,6 +84,8 @@ def load_seg_model(meta_dict: Dict[str, torch.Tensor]) -> Type[Segmentor]:
     if "optimizer" in meta_dict.keys():
         optimizer = meta_dict.pop("optimizer")
         model.optimizer = optimizer
+    if "binary_thresh" in loaded_dict.keys():
+        model.binary_thresh=loaded_dict.pop("binary_thresh")
     model.net.eval()
     return model
 
