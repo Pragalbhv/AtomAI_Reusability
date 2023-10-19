@@ -89,6 +89,7 @@ class BaseTrainer:
         self.augment_fn = None
         self.filename = "model"
         self.print_loss = 1
+        self.binary_thresh= None
         self.meta_state_dict = dict()
         self.loss_acc = {"train_loss": [], "test_loss": [],
                          "train_accuracy": [], "test_accuracy": []}
@@ -349,8 +350,11 @@ class BaseTrainer:
             "weights", self.net.state_dict())
         self.meta_state_dict["optimizer"] = self.meta_state_dict.get(
             "optimizer", self.optimizer)
+        self.meta_state_dict["binary_thresh"] = self.binary_thresh
+            
         torch.save(self.meta_state_dict,
                    filename + '.tar')
+        
 
     def print_statistics(self, e: int, **kwargs) -> None:
         """
