@@ -84,8 +84,8 @@ def load_seg_model(meta_dict: Dict[str, torch.Tensor]) -> Type[Segmentor]:
     if "optimizer" in meta_dict.keys():
         optimizer = meta_dict.pop("optimizer")
         model.optimizer = optimizer
-    if "binary_thresh" in loaded_dict.keys():
-        model.binary_thresh=loaded_dict.pop("binary_thresh")
+    if "binary_thresh" in meta_dict.keys():
+        model.binary_thresh=meta_dict.pop("binary_thresh")
     model.net.eval()
     return model
 

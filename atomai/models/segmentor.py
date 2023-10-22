@@ -218,7 +218,6 @@ class Segmentor(SegTrainer):
             self.downsample_factor = get_downsample_factor(self.net)
         use_gpu = self.device == 'cuda'
         ##################################start of edit#######################################################
-        print(not kwargs.get('thresh', False))
         if self.binary_thresh and not kwargs.get('thresh', False) :
             print('Performing auto-thresh prediction')
             prediction = SegPredictor(
