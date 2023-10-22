@@ -12,5 +12,5 @@
 - Credits and rights for each file belong to the respective entities:
   -- Au &CdSe: Groschner, C., Choi, C., & Scott, M. (2021). Machine Learning Pipeline for Segmentation and Defect Identification from High-Resolution Transmission Electron Microscopy Data. Microscopy and Microanalysis, 27(3), 549-556. doi:10.1017/S1431927621000386
   -- LBFO: C. Nelson, A. Ghosh, M. Ziatdinov and S. Kalinin V, (Zenodo, 2021).
-- 
+  
 
