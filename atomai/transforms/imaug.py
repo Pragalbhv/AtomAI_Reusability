@@ -258,7 +258,6 @@ class datatransform:
         y_batch_r = np.zeros((n, h, w, self.ch))
         for i, (img, gt) in enumerate(zip(X_batch, y_batch)):
             flip_type = np.random.randint(-3, 4)
-            self.tracker.append(flip_type)
             if flip_type == 3 and h == w:
                 img = cv2.rotate(img, cv2.ROTATE_90_CLOCKWISE)
                 gt = cv2.rotate(gt, cv2.ROTATE_90_CLOCKWISE)
