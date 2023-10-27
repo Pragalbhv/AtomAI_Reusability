@@ -634,7 +634,7 @@ class BaseTrainer:
                     e == self.training_cycles-1]):
                 self.print_statistics(e)
             ########################################## Start of Edit ########################################## 
-            if self.ES:
+            if self.ES and not self.swa:
                 if self.min_val_loss-self.loss_acc["test_loss"][-1]>self.tolerance :
                     self.min_val_loss=self.loss_acc["test_loss"][-1]
                     self.ES_model=copy.deepcopy(self.net) #making a deep copy of self.nn, on whatever device self.nn is
@@ -652,10 +652,6 @@ class BaseTrainer:
                         self.save_model(self.filename + "_metadict_final")
                         if not self.full_epoch:
                             self.eval_model()
-                        if self.swa:
-                            print("Performing stochastic weight averaging...")
-                            self.net.load_state_dict(average_weights(self.running_weights))
-                            self.eval_model()
                         if self.plot_training_history:
                             plot_losses(self.loss_acc["train_loss"],
                                         self.loss_acc["test_loss"])
@@ -667,7 +663,7 @@ class BaseTrainer:
         self.save_model(self.filename + "_metadict_final")
         if not self.full_epoch:
             self.eval_model()
-        if self.swa:
+        if self.swa and not self.ES:
             print("Performing stochastic weight averaging...")
             self.net.load_state_dict(average_weights(self.running_weights))
             self.eval_model()
