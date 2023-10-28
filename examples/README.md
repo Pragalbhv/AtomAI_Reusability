@@ -1,10 +1,10 @@
 # There are the following files contain the ES examples:
 
 ## Example 1: LBFO dataset demo
-![Early stopping + updated model on LBFO file](https://github.com/Pragalbhv/atomai/blob/master/examples/notebooks/EarlyStopping_LBFO_pv.ipynb)
+![Implementation of Updated Deep Convolutional Neural Network for Atom Finding using Early stopping](https://github.com/Pragalbhv/atomai/blob/master/examples/notebooks/EarlyStopping_LBFO_pv.ipynb)
 
-## Example 1: HRTEM dataset (Au/CdSe/Combined) demo
-[Early stopping + auto_thresholding + updated model on HRTEM file](https://github.com/Pragalbhv/atomai/blob/master/examples/notebooks/EarlyStopping_HRTEM_pv.ipynb)
+## Example 2: HRTEM dataset (Au/CdSe/Combined) demo
+![Implementation of Updated DCNN equipped with Early stopping and automatic-binary-thresholding for Nano-particle Segmentation](https://github.com/Pragalbhv/atomai/blob/master/examples/notebooks/EarlyStopping_HRTEM_pv.ipynb)
 
 ### The following configurations were used for training
 The parameters like training cycles, patience, and the number of augmented images created are modified so as to run in a Google colab notebook without any premium resources. 
