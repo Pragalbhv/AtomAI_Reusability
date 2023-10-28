@@ -50,9 +50,11 @@ The easiest way to start using AtomAI is via [Google Colab](https://colab.resear
 - [Variational Autoencoders: Exploring Order Parameters in Disordered Systems from Atomic Movies](https://colab.research.google.com/github/pycroscopy/atomai/blob/master/examples/notebooks/rVAE_graphene.ipynb)
 
 - [Implementation of Custom Image Denoiser in AtomAI](https://colab.research.google.com/github/pycroscopy/atomai/blob/master/examples/notebooks/atomai_custom_model.ipynb)
-   
-  [*More examples ->*](https://atomai.readthedocs.io/en/latest/examples.html)
 
+- [Implementation of Updated Deep Convolutional Neural Network for Atom Finding using Early stopping](https://github.com/Pragalbhv/atomai/blob/master/examples/notebooks/EarlyStopping_LBFO_pv.ipynb)
+
+- [Implementation of Updated DCNN equipped with Early stopping and automatic-binary-thresholding for Nano-particle Segmentation](https://github.com/Pragalbhv/atomai/blob/master/examples/notebooks/EarlyStopping_HRTEM_pv.ipynb)
+-   [*More examples ->*](https://atomai.readthedocs.io/en/latest/examples.html)
 
 ### Semantic segmentation
 
