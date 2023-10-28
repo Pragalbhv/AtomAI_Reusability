@@ -62,7 +62,7 @@ If your goal is to train and/or apply deep learning models for semantic segmenta
 ```python
 import atomai as aoi
 # Initialize model
-model = aoi.models.Segmentor(nb_classes=3)  # uses UNet by default
+model = aoi.models.Segmentor(nb_classes=1)  # uses UNet by default
 # Train
 model.fit(images, labels, images_test, labels_test, # training data (numpy arrays)
           training_cycles=300, compute_accuracy=True, swa=True # training parameters
@@ -72,6 +72,19 @@ Here ```swa``` stands for [stochastic weight averaging](https://arxiv.org/abs/18
 ```python
 nn_output, coordinates = model.predict(expdata)
 ```
+One could also use Early stopping instead of swa
+```python
+model.fit(images, labels, images_test, labels_test, # training data
+          training_cycles=3000, compute_accuracy=True, batch_size=16, ES=True,
+          patience=300,tolerance=1e-4,verbose=True,auto_thresh=True)
+```
+Here, Tolerance is the minimum improvement necessary to be considered as an improvement. Patience is the number of epochs the model runs for without improvement before terminating. This is done in an attempt to prevent the model from settling in a local minima and resulting in sub-par performance.
+
+ ```auto_thresh``` : Calculates the automatic binary threshold  for optimal f1-score is selected with respect to holdout-set ```images_test```. This is only implemented for a single binary class, i.e. nb_class=1
+
+
+If the user does not want to run early stopping or swa, they must explicitly set ```ES=False```
+
 
 ### ImSpec models
 AtomAI also provides models that can be used for predicting spectra from image data and vice versa. These models can be used for predicting property (functionality) from structure. An example can be predicting approximate scanning tulleling spectroscopy or electron energy loss spectroscopy spectra from structural images of local sample regions (the assumption is of course that there is only a small variability of spectral behaviour within each  (sub)-image). The training/prediction routines are very similar to those of the semantic segmentation model, with the main difference being that one has to specify the dimensions of input and output
