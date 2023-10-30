@@ -641,7 +641,9 @@ class BaseTrainer:
                     patience_used=0
 
                     if self.verbose: 
-                        print('Updating Early stopping model @ epoch: ',e+1)
+                        print('Updating Early stopping model @ epoch: ',e+1,' ... ',end='')
+                        self.print_statistics(e)
+                      
                 else:
                     patience_used+=1
                     if patience_used>self.patience:
