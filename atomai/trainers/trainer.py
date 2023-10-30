@@ -649,7 +649,7 @@ class BaseTrainer:
                     if patience_used>self.patience:
                         if self.verbose:
                             print('EARLY STOPPING @ step: ',e+1)
-                            print('Reverting to step: ',e-self.patience+1)
+                            print('Reverting to step: ',e-self.patience)
                         self.net=self.ES_model                        
                         self.save_model(self.filename + "_metadict_final")
                         if not self.full_epoch:
