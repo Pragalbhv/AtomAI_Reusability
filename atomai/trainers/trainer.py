@@ -390,6 +390,31 @@ class BaseTrainer:
                       np.around(self.loss_acc["test_loss"][-1], 4)),
                   'GPU memory usage: {}/{}'.format(
                       gpu_usage[0], gpu_usage[1]))
+          
+    def simple_print_statistics(self, e: int, **kwargs) -> None:
+        """
+        Prints loss and (optionally) accuracy score on train
+        and test data for ES
+        """
+        accuracy_metrics = self.accuracy_metrics
+        if accuracy_metrics is None:
+            accuracy_metrics = "Accuracy"
+        if self.compute_accuracy:
+            print('Training loss: {} ...'.format(
+                      np.around(self.loss_acc["train_loss"][-1], 4)),
+                  'Test loss: {} ...'.format(
+                      np.around(self.loss_acc["test_loss"][-1], 4)),
+                  'Train {}: {} ...'.format(
+                      accuracy_metrics,
+                      np.around(self.loss_acc["train_accuracy"][-1], 4)),
+                  'Test {}: {} ...'.format(
+                      accuracy_metrics,
+                      np.around(self.loss_acc["test_accuracy"][-1], 4))
+        else:
+            print('Training loss: {} ...'.format(
+                      np.around(self.loss_acc["train_loss"][-1], 4)),
+                  'Test loss: {} ...'.format(
+                      np.around(self.loss_acc["test_loss"][-1], 4))
 
     def accuracy_fn(self, *args) -> None:
         """
@@ -641,7 +666,7 @@ class BaseTrainer:
                     patience_used=0
 
                     if self.verbose: 
-                        print('Updating Early stopping model @ epoch: ',e+1,' ... ',end='')
+                        print('Updating ES model @ epoch: ',e+1,', ',end='')
                         self.print_statistics(e)
                       
                 else:
