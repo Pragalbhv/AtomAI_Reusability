@@ -409,12 +409,12 @@ class BaseTrainer:
                       np.around(self.loss_acc["train_accuracy"][-1], 4)),
                   'Test {}: {} ...'.format(
                       accuracy_metrics,
-                      np.around(self.loss_acc["test_accuracy"][-1], 4))
+                      np.around(self.loss_acc["test_accuracy"][-1], 4)))
         else:
             print('Training loss: {} ...'.format(
                       np.around(self.loss_acc["train_loss"][-1], 4)),
                   'Test loss: {} ...'.format(
-                      np.around(self.loss_acc["test_loss"][-1], 4))
+                      np.around(self.loss_acc["test_loss"][-1], 4)))
 
     def accuracy_fn(self, *args) -> None:
         """
