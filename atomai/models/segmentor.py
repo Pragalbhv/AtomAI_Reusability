@@ -263,7 +263,7 @@ class Segmentor(SegTrainer):
         max_f1=-1
         thresh=[0.05,0.1,0.15,0.2,0.25,0.3,0.35,0.4,0.45,0.5,0.55,0.6,0.65,0.7,0.75,0.8,0.85,0.9,0.95]
         for idx in range(len(thresh)):
-            print('Checking Threshold item#: ',idx+1,'/',len(thresh), end="\r")
+            print('Checking Threshold item#: ',idx+1,'/',len(thresh), end="\r",flush=True)
             
             threshold = thresh[idx]
             class_pred = np.zeros(pred_val[0].shape[:3])
