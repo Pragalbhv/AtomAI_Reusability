@@ -641,7 +641,7 @@ class BaseTrainer:
                     patience_used=0
 
                     if self.verbose: 
-                        print('Updating ES model @ epoch: ',e+1,', ',end='')
+                        print('Updating ES model @ ',end='')
                         self.print_statistics(e)
                       
                 else:
