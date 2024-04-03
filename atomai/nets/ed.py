@@ -125,14 +125,14 @@ class SignalDecoder(nn.Module):
         if self.upsampling:
             signal_dim = [s // 4 for s in signal_dim]
         n = np.product(signal_dim)
-        self.reshape_ = (hidden_size, *signal_dim)  # Updated to hidden_size
-        self.fc = nn.Linear(z_dim, hidden_size*n)  # Updated to hidden_size
+        self.reshape_ = (1, hidden_size, *signal_dim)  # Adjusted reshape
+        self.fc = nn.Linear(z_dim, hidden_size*n)
         if self.upsampling:
             self.deconv1 = ConvBlock(
-                ndim, 1, hidden_size, hidden_size,  # Updated to hidden_size
+                ndim, 1, hidden_size, hidden_size,
                 lrelu_a=0.1, batch_norm=bn)
             self.deconv2 = ConvBlock(
-                ndim, 1, hidden_size, hidden_size,  # Updated to hidden_size
+                ndim, 1, hidden_size, hidden_size,
                 lrelu_a=0.1, batch_norm=bn)
         self.lstm = nn.LSTM(n, hidden_size, num_layers, batch_first=True)
         self.fc_out = nn.Linear(hidden_size, n)
@@ -152,11 +152,13 @@ class SignalDecoder(nn.Module):
             x = F.interpolate(x, scale_factor=2, mode="nearest")
             x = self.deconv2(x)
             x = F.interpolate(x, scale_factor=2, mode="nearest")
-        x = x.permute(0, 2, 1)  # Adjust the dimensions for LSTM
+        x = x.permute(0, 2, 3, 1)  # Adjust the dimensions for LSTM
+        batch_size, hidden_size, *signal_dim = x.size()
+        x = x.view(batch_size, hidden_size, -1)  # Reshape for LSTM
         output, _ = self.lstm(x)
         output = output[:, -1, :]  # Take only the last time step
         x = self.fc_out(output)
-        x = x.reshape(-1, *self.reshape_)  # Reshape back to original shape
+        x = x.view(batch_size, hidden_size, *signal_dim)  # Reshape back
         return self.out(x)
 
 
