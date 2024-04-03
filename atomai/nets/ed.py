@@ -83,82 +83,46 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 from typing import Tuple
-import numpy as np
 
 class SignalDecoder(nn.Module):
-    """
-    Decodes a latent vector into 1D/2D signal using LSTM
-
-    Args:
-        signal_dim:
-            Size of input signal. For images, it is (height, width).
-            For spectra, it is (length,)
-        z_dim:
-            Number of fully-connected neurons in a "bottleneck layer"
-            (latent dimensions)
-        hidden_size:
-            Number of features in the hidden state of the LSTM
-        num_layers:
-            Number of LSTM layers
-        **batch_norm (bool):
-            Apply batch normalization after each LSTM layer
-            (Default: True)
-        **upsampling (bool):
-            Performs upsampling+convolution operation twice on the reshaped latent
-            vector (starting from image/spectra dims 4x smaller than the target dims)
-            before passing  to the decoder
-    """
     def __init__(self, signal_dim: Tuple[int],
-                 z_dim: int, hidden_size: int, num_layers: int,
+                 z_dim: int, nb_layers: int, nb_filters: int,
                  **kwargs: bool) -> None:
-        """
-        Initializes module parameters
-        """
         super(SignalDecoder, self).__init__()
         self.upsampling = kwargs.get("upsampling", False)
         bn = kwargs.get('batch_norm', True)
         if isinstance(signal_dim, int):
             signal_dim = (signal_dim,)
         if not 0 < len(signal_dim) < 3:
-            raise AssertionError("signal dimensionality must be 1D or 2D")
+            raise AssertionError("signal dimensionality must be to 1D or 2D")
         ndim = 2 if len(signal_dim) == 2 else 1
         if self.upsampling:
             signal_dim = [s // 4 for s in signal_dim]
         n = np.product(signal_dim)
-        self.reshape_ = (hidden_size, *signal_dim)  # Adjusted reshape
-        self.fc = nn.Linear(z_dim, hidden_size*n)
-        if self.upsampling:
-            self.deconv1 = ConvBlock(
-                ndim, 1, hidden_size, hidden_size,
-                lrelu_a=0.1, batch_norm=bn)
-            self.deconv2 = ConvBlock(
-                ndim, 1, hidden_size, hidden_size,
-                lrelu_a=0.1, batch_norm=bn)
-        self.lstm = nn.LSTM(input_size=n, hidden_size=hidden_size, num_layers=num_layers, batch_first=True)
-        self.fc_out = nn.Linear(hidden_size, n)
+        self.reshape_ = (nb_filters, *signal_dim)
+        self.fc = nn.Linear(z_dim, nb_filters*n)
+        
+        # LSTM layer
+        self.lstm = nn.LSTM(input_size=nb_filters, hidden_size=nb_filters, num_layers=nb_layers, batch_first=True)
+        
+        # Output layer
         if ndim == 2:
-            self.out = nn.Conv2d(1, 1, 1)
+            self.out = nn.Linear(nb_filters, np.prod(signal_dim))
         else:
-            self.out = nn.Conv1d(1, 1, 1)
+            self.out = nn.Linear(nb_filters, signal_dim[0])
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        """
-        Generates a signal from embedded features (latent vector)
-        """
         x = self.fc(x)
         x = x.reshape(-1, *self.reshape_)
         if self.upsampling:
-            x = self.deconv1(x)
-            x = F.interpolate(x, scale_factor=2, mode="nearest")
-            x = self.deconv2(x)
-            x = F.interpolate(x, scale_factor=2, mode="nearest")
-        x = x.permute(0, 2, 3, 1)  # Adjust the dimensions for LSTM
-        batch_size, hidden_size, *signal_dim = x.size()
-        x = x.view(batch_size, -1, hidden_size)  # Reshape for LSTM
-        output, _ = self.lstm(x)
-        output = output[:, -1, :]  # Take only the last time step
-        x = self.fc_out(output)
-        x = x.view(batch_size, hidden_size, *signal_dim)  # Reshape back
+            x = F.interpolate(x, scale_factor=4, mode="nearest")
+        # Flatten the tensor for LSTM input
+        x = x.view(x.size(0), -1, self.reshape_[0])
+        # LSTM layer
+        x, _ = self.lstm(x)
+        # Take the output from the last time step
+        x = x[:, -1, :]
+        # Output layer
         return self.out(x)
 
 
