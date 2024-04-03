@@ -125,14 +125,14 @@ class SignalDecoder(nn.Module):
         if self.upsampling:
             signal_dim = [s // 4 for s in signal_dim]
         n = np.product(signal_dim)
-        self.reshape_ = (nb_filters, *signal_dim)
-        self.fc = nn.Linear(z_dim, nb_filters*n)
+        self.reshape_ = (hidden_size, *signal_dim)  # Updated to hidden_size
+        self.fc = nn.Linear(z_dim, hidden_size*n)  # Updated to hidden_size
         if self.upsampling:
             self.deconv1 = ConvBlock(
-                ndim, 1, nb_filters, nb_filters,
+                ndim, 1, hidden_size, hidden_size,  # Updated to hidden_size
                 lrelu_a=0.1, batch_norm=bn)
             self.deconv2 = ConvBlock(
-                ndim, 1, nb_filters, nb_filters,
+                ndim, 1, hidden_size, hidden_size,  # Updated to hidden_size
                 lrelu_a=0.1, batch_norm=bn)
         self.lstm = nn.LSTM(n, hidden_size, num_layers, batch_first=True)
         self.fc_out = nn.Linear(hidden_size, n)
@@ -158,7 +158,6 @@ class SignalDecoder(nn.Module):
         x = self.fc_out(output)
         x = x.reshape(-1, *self.reshape_)  # Reshape back to original shape
         return self.out(x)
-
 
 
 class SignalED(nn.Module):
