@@ -111,8 +111,6 @@ class SignalDecoder(nn.Module):
         else:
             self.out = nn.Linear(nb_filters, signal_dim[0])
 
-        self.unsqueeze = nn.Unsqueeze(1)
-
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.fc(x)
         x = x.reshape(-1, *self.reshape_)
@@ -126,7 +124,7 @@ class SignalDecoder(nn.Module):
         x = x[:, -1, :]
         # Output layer
         x = self.out(x)
-        x = self.unsqueeze(x)
+        x = torch.unsqueeze(x, 1)
         return x
 
 
