@@ -371,23 +371,23 @@ class BaseTrainer:
         if self.compute_accuracy:
             print('Epoch {}/{} ...'.format(e+1, self.training_cycles),
                   'Training loss: {} ...'.format(
-                      np.around(self.loss_acc["train_loss"][-1], 4)),
+                      np.around(self.loss_acc["train_loss"][-1], 6)),
                   'Test loss: {} ...'.format(
-                      np.around(self.loss_acc["test_loss"][-1], 4)),
+                      np.around(self.loss_acc["test_loss"][-1], 6)),
                   'Train {}: {} ...'.format(
                       accuracy_metrics,
-                      np.around(self.loss_acc["train_accuracy"][-1], 4)),
+                      np.around(self.loss_acc["train_accuracy"][-1], 6)),
                   'Test {}: {} ...'.format(
                       accuracy_metrics,
-                      np.around(self.loss_acc["test_accuracy"][-1], 4)),
+                      np.around(self.loss_acc["test_accuracy"][-1], 6)),
                   'GPU memory usage: {}/{}'.format(
                       gpu_usage[0], gpu_usage[1]))
         else:
             print('Epoch {}/{} ...'.format(e+1, self.training_cycles),
                   'Training loss: {} ...'.format(
-                      np.around(self.loss_acc["train_loss"][-1], 4)),
+                      np.around(self.loss_acc["train_loss"][-1], 6)),
                   'Test loss: {} ...'.format(
-                      np.around(self.loss_acc["test_loss"][-1], 4)),
+                      np.around(self.loss_acc["test_loss"][-1], 6)),
                   'GPU memory usage: {}/{}'.format(
                       gpu_usage[0], gpu_usage[1]))          
 
@@ -537,7 +537,7 @@ class BaseTrainer:
         ########################################### Start of Edit ##########################################            
         if self.ES and not self.swa:
             self.patience=kwargs.get("patience",self.training_cycles//10)
-            self.tolerance=kwargs.get("tolerance",1e-3)
+            self.tolerance=kwargs.get("tolerance",1e-4)
             self.min_val_loss=sys.float_info.max
             self.verbose=kwargs.get("verbose",False)
             self.ES_model=None #To store Early stoppng model eventually
