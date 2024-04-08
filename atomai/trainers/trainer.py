@@ -537,7 +537,7 @@ class BaseTrainer:
         ########################################### Start of Edit ##########################################            
         if self.ES and not self.swa:
             self.patience=kwargs.get("patience",self.training_cycles//10)
-            self.tolerance=kwargs.get("tolerance",1e-4)
+            self.tolerance=kwargs.get("tolerance",1e-5)
             self.min_val_loss=sys.float_info.max
             self.verbose=kwargs.get("verbose",False)
             self.ES_model=None #To store Early stoppng model eventually
