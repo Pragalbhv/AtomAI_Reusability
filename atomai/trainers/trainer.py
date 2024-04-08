@@ -561,13 +561,13 @@ class BaseTrainer:
             if optimizer is None:
                 # will be overwitten by lr_scheduler (if activated)
                 ########################################### Start of Edit #########################################
-                self.optimizer = torch.optim.Adam(params, lr=1e-3, weight_decay=self.reg)
+                self.optimizer = torch.optim.Adam(params, lr=1e-4, weight_decay=self.reg)
             else:
                 try:
-                    self.optimizer = optimizer(params,lr=1e-3, weight_decay=self.reg)
+                    self.optimizer = optimizer(params,lr=1e-4, weight_decay=self.reg)
                 except:
                     print("Optimizer does not support Weight decay")
-                    self.optimizer = optimizer(params,lr=1e-3)
+                    self.optimizer = optimizer(params,lr=1e-4)
                 #self.optimizer = optimizer(params)
             
             
