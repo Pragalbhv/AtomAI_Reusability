@@ -103,13 +103,13 @@ class SignalDecoder(nn.Module):
         self.fc = nn.Linear(z_dim, nb_filters*n)
         
         # LSTM layer
-        self.lstm = nn.LSTM(input_size=nb_filters, hidden_size=nb_filters*4, num_layers=nb_layers, batch_first=True)
+        self.lstm = nn.LSTM(input_size=nb_filters, hidden_size=nb_filters/4, num_layers=nb_layers, batch_first=True)
         
         # Output layer
         if ndim == 2:
-            self.out = nn.Linear(nb_filters*4, np.prod(signal_dim))
+            self.out = nn.Linear(nb_filters/4, np.prod(signal_dim))
         else:
-            self.out = nn.Linear(nb_filters*4, signal_dim[0])
+            self.out = nn.Linear(nb_filters/4, signal_dim[0])
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         x = self.fc(x)
