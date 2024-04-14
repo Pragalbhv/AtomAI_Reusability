@@ -3,6 +3,6 @@ from .etrainer import BaseEnsembleTrainer, EnsembleTrainer
 from .vitrainer import viBaseTrainer
 from .gptrainer import dklGPTrainer, GPTrainer
 
-__all__ = ["SegTrainer", "ImSpecTrainer", "BaseTrainer", "BaseEnsembleTrainer",
+__all__ = ["SegTrainer", "ImSpecTrainer", "ImSpecTrainerLSTM", "BaseTrainer", "BaseEnsembleTrainer",
            "EnsembleTrainer", "viBaseTrainer", "dklGPTrainer", "RegTrainer", "clsTrainer",
            "GPTrainer"]
