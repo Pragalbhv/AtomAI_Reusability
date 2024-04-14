@@ -10,7 +10,7 @@ from .reg_cls import RegressorNet, ClassifierNet, MultiTaskClassifierNet, init_r
 __all__ = ['ConvBlock', 'ResBlock', 'ResModule', 'UpsampleBlock', 'DilatedBlock',
            'init_fcnn_model', 'SegResNet', 'Unet', 'ResHedNet', 'dilnet', 'fcEncoderNet',
            'fcDecoderNet',  'convEncoderNet', 'convDecoderNet', 'rDecoderNet',
-           'coord_latent', 'load_model', 'load_ensemble', 'init_imspec_model',
+           'coord_latent', 'load_model', 'load_ensemble', 'init_imspec_model', 'init_imspec_model_lstm',
            'init_VAE_nets', 'SignalEncoder', 'SignalDecoder', 'SignalED',
            'fcFeatureExtractor', 'GPRegressionModel', 'CustomBackbone', 'RegressorNet',
            'ClassifierNet', 'init_reg_model', 'init_cls_model', 'CustomGPModel', 'MultiTaskClassifierNet']
