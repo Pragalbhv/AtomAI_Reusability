@@ -222,7 +222,7 @@ class ImSpecLSTM(ImSpecTrainerLSTM):
                  out_dim: Tuple[int],
                  latent_dim: int = 2,
                  **kwargs) -> None:
-        super(ImSpec, self).__init__(in_dim, out_dim, latent_dim, **kwargs)
+        super(ImSpecLSTM, self).__init__(in_dim, out_dim, latent_dim, **kwargs)
         self.latent_dim = latent_dim
 
     def fit(self,
