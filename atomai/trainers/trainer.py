@@ -561,13 +561,13 @@ class BaseTrainer:
             if optimizer is None:
                 # will be overwitten by lr_scheduler (if activated)
                 ########################################### Start of Edit #########################################
-                self.optimizer = torch.optim.Adam(params, lr=1e-4, weight_decay=self.reg)
+                self.optimizer = torch.optim.Adam(params, lr=5e-4, weight_decay=self.reg)
             else:
                 try:
-                    self.optimizer = optimizer(params,lr=1e-4, weight_decay=self.reg)
+                    self.optimizer = optimizer(params,lr=5e-4, weight_decay=self.reg)
                 except:
                     print("Optimizer does not support Weight decay")
-                    self.optimizer = optimizer(params,lr=1e-4)
+                    self.optimizer = optimizer(params,lr=5e-4)
                 #self.optimizer = optimizer(params)
             
             
@@ -635,7 +635,7 @@ class BaseTrainer:
                 self.print_statistics(e)
             ########################################## Start of Edit ########################################## 
             if self.ES and not self.swa:
-                if self.min_val_loss-self.loss_acc["test_loss"][-1]>self.tolerance :
+                if self.loss_acc["test_loss"][-1] < self.loss_acc["test_loss"][-2] :
                     self.min_val_loss=self.loss_acc["test_loss"][-1]
                     self.ES_model=copy.deepcopy(self.net) #making a deep copy of self.nn, on whatever device self.nn is
                     patience_used=0
