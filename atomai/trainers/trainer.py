@@ -635,7 +635,7 @@ class BaseTrainer:
                 self.print_statistics(e)
             ########################################## Start of Edit ########################################## 
             if self.ES and not self.swa:
-                if self.loss_acc["test_loss"][-1] < min_val_loss :
+                if self.loss_acc["test_loss"][-1] < self.min_val_loss :
                     self.min_val_loss=self.loss_acc["test_loss"][-1]
                     self.ES_model=copy.deepcopy(self.net) #making a deep copy of self.nn, on whatever device self.nn is
                     patience_used=0
