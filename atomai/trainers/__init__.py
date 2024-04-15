@@ -1,4 +1,4 @@
-from .trainer import SegTrainer, ImSpecTrainer, RegTrainer, clsTrainer, BaseTrainer
+from .trainer import SegTrainer, ImSpecTrainer, ImSpecTrainerLSTM, RegTrainer, clsTrainer, BaseTrainer
 from .etrainer import BaseEnsembleTrainer, EnsembleTrainer
 from .vitrainer import viBaseTrainer
 from .gptrainer import dklGPTrainer, GPTrainer
