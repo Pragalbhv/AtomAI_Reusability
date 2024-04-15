@@ -1,7 +1,7 @@
 from .blocks import ConvBlock, DilatedBlock, ResBlock, ResModule, UpsampleBlock, CustomBackbone
 from .ed import (SignalDecoder, SignalED, SignalEncoder, convDecoderNet,
                  convEncoderNet, coord_latent, fcDecoderNet, fcEncoderNet,
-                 rDecoderNet, init_imspec_model, init_VAE_nets)
+                 rDecoderNet, init_imspec_model, init_imspec_model_lstm, init_VAE_nets)
 from .fcnn import Unet, dilnet, SegResNet, ResHedNet, init_fcnn_model
 from .gp import fcFeatureExtractor, GPRegressionModel, CustomGPModel
 from .reg_cls import RegressorNet, ClassifierNet, MultiTaskClassifierNet, init_reg_model, init_cls_model
