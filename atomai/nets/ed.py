@@ -160,7 +160,7 @@ class SignalDecoderLSTM(nn.Module):
     def __init__(self, signal_dim: Tuple[int],
                  z_dim: int, nb_layers: int, nb_filters: int,
                  **kwargs: bool) -> None:
-        super(SignalDecoder, self).__init__()
+        super(SignalDecoderLSTM, self).__init__()
         self.upsampling = kwargs.get("upsampling", False)
         bn = kwargs.get('batch_norm', True)
         if isinstance(signal_dim, int):
@@ -314,7 +314,7 @@ class SignalED_LSTM(nn.Module):
         """
         Initializes im2spec/spec2im parameters
         """
-        super(SignalED, self).__init__()
+        super(SignalED_LSTM, self).__init__()
         self.encoder = SignalEncoder(
             feature_dim, latent_dim, nblayers_encoder, nbfilters_encoder,
             batch_norm=batch_norm, downsampling=encoder_downsampling)
