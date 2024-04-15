@@ -973,7 +973,7 @@ class ImSpecTrainerLSTM(BaseTrainer):
                  out_dim: Tuple[int],
                  latent_dim: int = 2,
                  **kwargs: Union[int, bool, str]) -> None:
-        super(ImSpecTrainer, self).__init__()
+        super(ImSpecTrainerLSTM, self).__init__()
         """
         Initialize trainer's parameters
         """
