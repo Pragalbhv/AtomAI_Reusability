@@ -672,6 +672,8 @@ class BaseTrainer:
         if self.plot_training_history:
             plot_losses(self.loss_acc["train_loss"],
                         self.loss_acc["test_loss"])
+        if self.ES:
+            self.eval_model()
         return self.net
 
     def fit(self) -> None:
