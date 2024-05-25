@@ -669,11 +669,12 @@ class BaseTrainer:
             print("Performing stochastic weight averaging...")
             self.net.load_state_dict(average_weights(self.running_weights))
             self.eval_model()
+        if self.ES:
+            self.eval_model()
         if self.plot_training_history:
             plot_losses(self.loss_acc["train_loss"],
                         self.loss_acc["test_loss"])
-        if self.ES:
-            self.eval_model()
+        
         return self.net
 
     def fit(self) -> None:
