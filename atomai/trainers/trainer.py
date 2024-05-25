@@ -301,10 +301,10 @@ class BaseTrainer:
                     running_acc_test += loss_[1]
                 c += 1
             print('Model (final state) evaluation loss:',
-                  np.around(running_loss_test / c, 4))
+                  np.around(running_loss_test / c, 6))
             if self.compute_accuracy:
                 print('Model (final state) accuracy:',
-                      np.around(running_acc_test / c, 4))
+                      np.around(running_acc_test / c, 6))
         else:
             running_loss_test, running_acc_test = 0, 0
             for idx in range(len(self.X_test)):
@@ -314,10 +314,10 @@ class BaseTrainer:
                 if self.compute_accuracy:
                     running_acc_test += loss_[1]
             print('Model (final state) evaluation loss:',
-                  np.around(running_loss_test / len(self.X_test), 4))
+                  np.around(running_loss_test / len(self.X_test), 6))
             if self.compute_accuracy:
                 print('Model (final state) accuracy:',
-                      np.around(running_acc_test / len(self.X_test), 4))
+                      np.around(running_acc_test / len(self.X_test), 6))
 
     def dataloader(self,
                    batch_num: int,
@@ -610,7 +610,7 @@ class BaseTrainer:
         kwargs for utils.datatransform class to perform
         the data augmentation "on-the-fly"
         
-        EDITED: Implemnted Early stopping
+        EDITED: Implemented Early stopping
         """
         ########################################### Start of Edit ########################################## 
         
