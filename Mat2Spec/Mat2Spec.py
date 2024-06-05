@@ -95,6 +95,7 @@ class Mat2Spec(nn.Module):
         self.W = nn.Linear(args.Mat2Spec_label_dim, args.Mat2Spec_emb_size) # linear transformation for label
 
     def label_encode(self, x):
+        #h0 = self.dropout(F.relu(self.fe0(x)))  # [label_dim, emb_size]
         h1 = self.dropout(F.relu(self.fe1(x)))  # [label_dim, 512]
         h2 = self.dropout(F.relu(self.fe2(h1)))  # [label_dim, 256]
         mu = self.fe_mu(h2) * self.scale_coeff  # [label_dim, latent_dim]
@@ -239,26 +240,31 @@ def compute_loss(input_label, output, NORMALIZER, args):
     fx_mix_coeff = output['fx_mix_coeff']  # [bs, K]
     fe_mix_coeff = output['fe_mix_coeff']
     fx_mix_coeff = F.softmax(fx_mix_coeff, dim=-1)
-    fe_mix_coeff = F.softmax(fe_mix_coeff, dim=-1)
+    fe_mix_coeff = F.softmax(fe_mix_coeff, dim=-1)    
     fe_mix_coeff = fe_mix_coeff.repeat(1, args.Mat2Spec_K)
     fx_mix_coeff = fx_mix_coeff.repeat(1, args.Mat2Spec_label_dim)
-    mix_coeff = fe_mix_coeff * fx_mix_coeff
+    mix_coeff = fe_mix_coeff * fx_mix_coeff    
     fx_mu = fx_mu.repeat(1, args.Mat2Spec_label_dim, 1)
     fx_logvar = fx_logvar.repeat(1, args.Mat2Spec_label_dim, 1)
     fe_mu = fe_mu.squeeze(0).expand(fx_mu.shape[0], fe_mu.shape[0], fe_mu.shape[1])
-    fe_logvar = fe_logvar.squeeze(0).expand(fx_mu.shape[0], fe_logvar.shape[0], fe_logvar.shape[1])
+    fe_logvar = fe_logvar.squeeze(0).expand(fx_mu.shape[0], fe_logvar.shape[0], fe_logvar.shape[1])   
     fe_mu = fe_mu.repeat(1, args.Mat2Spec_K, 1)
     fe_logvar = fe_logvar.repeat(1, args.Mat2Spec_K, 1)
     kl_all = kl(fx_mu, fe_mu, fx_logvar, fe_logvar)
     kl_all_inv = kl(fe_mu, fx_mu, fe_logvar, fx_logvar)
     kl_loss = torch.mean(torch.sum(mix_coeff * (0.5*kl_all + 0.5*kl_all_inv), dim=-1))
+    #c_loss = torch.mean(-1 * F.cosine_similarity(label_proj, feat_proj))
     c_loss = compute_c_loss(label_proj, feat_proj)
+    # print(fe_mix_coeff.shape, fx_mix_coeff.shape, mix_coeff.shape)
 
     if args.label_scaling == 'normalized_sum':
         assert args.Mat2Spec_loss_type == 'KL' or args.Mat2Spec_loss_type == 'WD'
+        #input_label_normalize = F.softmax(torch.log(input_label+1e-6), dim=1)
         input_label_normalize = input_label / (torch.sum(input_label, dim=1, keepdim=True)+1e-8)
         pred_e = F.softmax(fe_out, dim=1)
         pred_x = F.softmax(fx_out, dim=1)
+        #nll_loss = kl_loss_fn(torch.log(pred_e+1e-8), input_label_normalize)
+        #nll_loss_x = kl_loss_fn(torch.log(pred_x+1e-8), input_label_normalize)
         P = input_label_normalize
         Q_e = pred_e
         Q_x = pred_x
@@ -270,8 +276,12 @@ def compute_loss(input_label, output, NORMALIZER, args):
 
         if args.Mat2Spec_loss_type == 'KL':
             nll_loss = torch.mean(torch.sum(P*(torch.log(P+1e-8)-torch.log(Q_e+1e-8)),dim=1)) \
+                #+ torch.mean(torch.sum(Q_e*(torch.log(Q_e+1e-8)-torch.log(P+1e-8)),dim=1))
             nll_loss_x = torch.mean(torch.sum(P*(torch.log(P+1e-8)-torch.log(Q_x+1e-8)),dim=1)) \
+                #+ torch.mean(torch.sum(Q_x*(torch.log(Q_x+1e-8)-torch.log(P+1e-8)),dim=1))
         elif args.Mat2Spec_loss_type == 'WD':
+            #nll_loss, _, _ = sinkhorn(Q_e, P)
+            #nll_loss_x, _, _ = sinkhorn(Q_x, P)
             nll_loss = torch_wasserstein_loss(Q_e, P)
             nll_loss_x = torch_wasserstein_loss(Q_x, P)
         total_loss = (nll_loss + nll_loss_x) * c1 + kl_loss * c2 + c_loss * c3
@@ -294,7 +304,6 @@ def compute_loss(input_label, output, NORMALIZER, args):
         elif args.Mat2Spec_loss_type == 'MSE':
             nll_loss = torch.mean((pred_e-input_label)**2)
             nll_loss_x = torch.mean((pred_x-input_label)**2)
-        total_loss = (nll_loss + nll_loss_x) * c1 + kl_loss * c2 + c_loss * c3
+        total_loss = (nll_loss + nll_loss_x) * c1 + kl_loss * c2 + c_loss * c3 
 
         return total_loss, nll_loss, nll_loss_x, kl_loss, c_loss, pred_e, pred_x
-        
