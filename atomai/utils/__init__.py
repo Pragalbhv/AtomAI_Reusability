@@ -6,3 +6,4 @@ from .viz import *
 from .graphx import *
 from .preproc import *
 from .aseutils import *
+from .instance_seg_utils import *
