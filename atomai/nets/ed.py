@@ -78,7 +78,6 @@ class SignalEncoder(nn.Module):
         x = x.reshape(-1, self.reshape_)
         return self.fc(x)
 
-
 class SignalDecoder(nn.Module):
     """
     Decodes a latent vector into 1D/2D signal
@@ -155,7 +154,51 @@ class SignalDecoder(nn.Module):
         x = self.dilblock(x)
         x = self.conv(x)
         return self.out(x)
+        
+##### EDIT FOR LSTM #####
+class SignalDecoderLSTM(nn.Module):
+    def __init__(self, signal_dim: Tuple[int],
+                 z_dim: int, nb_layers: int, nb_filters: int,
+                 **kwargs: bool) -> None:
+        super(SignalDecoderLSTM, self).__init__()
+        self.upsampling = kwargs.get("upsampling", False)
+        bn = kwargs.get('batch_norm', True)
+        if isinstance(signal_dim, int):
+            signal_dim = (signal_dim,)
+        if not 0 < len(signal_dim) < 3:
+            raise AssertionError("signal dimensionality must be to 1D or 2D")
+        ndim = 2 if len(signal_dim) == 2 else 1
+        if self.upsampling:
+            signal_dim = [s // 4 for s in signal_dim]
+        n = np.product(signal_dim)
+        self.reshape_ = (nb_filters, *signal_dim)
+        self.fc = nn.Linear(z_dim, nb_filters*n)
+        
+        # LSTM layer
+        self.lstm = nn.LSTM(input_size=nb_filters, hidden_size=nb_filters*4, num_layers=nb_layers, batch_first=True)
+        
+        # Output layer
+        if ndim == 2:
+            self.out = nn.Linear(nb_filters*4, np.prod(signal_dim))
+        else:
+            self.out = nn.Linear(nb_filters*4, signal_dim[0])
 
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        x = self.fc(x)
+        x = x.reshape(-1, *self.reshape_)
+        if self.upsampling:
+            x = F.interpolate(x, scale_factor=4, mode="nearest")
+        # Flatten the tensor for LSTM input
+        x = x.view(x.size(0), -1, self.reshape_[0])
+        # LSTM layer
+        x, _ = self.lstm(x)
+        # Take the output from the last time step
+        x = x[:, -1, :]
+        # Output layer
+        x = self.out(x)
+        x = torch.unsqueeze(x, 1)
+        return x
+##### EDIT FOR LSTM #####
 
 class SignalED(nn.Module):
     """
@@ -227,7 +270,78 @@ class SignalED(nn.Module):
         x = self.encode(x)
         return self.decode(x)
 
+##### EDIT FOR LSTM #####
+class SignalED_LSTM(nn.Module):
+    """
+    Transforms image into spectra (im2spec) and vice versa (spec2im)
 
+    Args:
+        feature_dim:
+            Input data dimensions.
+            (height, width) for images or (length,) for spectra
+        target_dim:
+            Output dimensions.
+            (length,) for spectra or (height, width) for images
+        latent_dim:
+            Dimensionality of the latent space
+            (number of neurons in a fully connected "bottleneck" layer)
+        nblayers_encoder:
+            Number of convolutional layers in the encoder
+        nblayers_decoder:
+            Number of convolutional layers in the decoder
+        nbfilters_encoder:
+            number of convolutional filters in each layer of the encoder
+        nbfilters_decoder:
+            Number of convolutional filters in each layer of the decoder
+        batch_norm:
+            Apply batch normalization after each convolutional layer
+            (Default: True)
+        encoder_downsampling:
+            Downsamples input data by this factor before passing
+            to convolutional layers (Default: no downsampling)
+        decoder_upsampling:
+            Performs upsampling+convolution operation twice on the reshaped latent
+            vector (starting from image/spectra dims 4x smaller than the target dims)
+            before passing  to the decoder
+
+    """
+    def __init__(self, feature_dim: Tuple[int],
+                 target_dim: Tuple[int], latent_dim: int,
+                 nblayers_encoder: int = 2, nblayers_decoder: int = 2,
+                 nbfilters_encoder: int = 64, nbfilters_decoder: int = 2,
+                 batch_norm: bool = True, encoder_downsampling: int = 0,
+                 decoder_upsampling: bool = False) -> None:
+        """
+        Initializes im2spec/spec2im parameters
+        """
+        super(SignalED_LSTM, self).__init__()
+        self.encoder = SignalEncoder(
+            feature_dim, latent_dim, nblayers_encoder, nbfilters_encoder,
+            batch_norm=batch_norm, downsampling=encoder_downsampling)
+        self.decoder = SignalDecoderLSTM(
+            target_dim, latent_dim, nblayers_decoder, nbfilters_decoder,
+            batch_norm=batch_norm, upsampling=decoder_upsampling)
+
+    def encode(self, features: torch.Tensor) -> torch.Tensor:
+        """
+        Embeddes the input image into a latent vector
+        """
+        return self.encoder(features)
+
+    def decode(self, latent: torch.Tensor) -> torch.Tensor:
+        """
+        Generates signal from the embedded features
+        """
+        return self.decoder(latent)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """
+        Forward pass
+        """
+        x = self.encode(x)
+        return self.decode(x)
+##### EDIT FOR LSTM #####
+  
 class convEncoderNet(nn.Module):
     """
     Convolutional encoder/inference network (for variational autoencoder)
@@ -720,6 +834,42 @@ def init_imspec_model(in_dim: Tuple[int],
         "decoder_upsampling": decoder_upsampling
     }
     return net, meta_state_dict
+
+##### EDIT FOR LSTM #####
+def init_imspec_model_lstm(in_dim: Tuple[int],
+                      out_dim: Tuple[int],
+                      latent_dim: int,
+                      **kwargs: Union[int, bool]
+                      ) -> Tuple[Type[nn.Module], Dict[str, Union[int, bool]]]:
+    """
+    Initializes ImSpec model
+    """
+    nblayers_encoder = kwargs.get("nblayers_encoder", 3)
+    nblayers_decoder = kwargs.get("nblayers_decoder", 4)
+    nbfilters_encoder = kwargs.get("nbfilters_encoder", 64)
+    nbfilters_decoder = kwargs.get("nbfilters_decoder", 64)
+    batch_norm = kwargs.get("batch_norm", True)
+    encoder_downsampling = kwargs.get("encoder_downsampling", 0)
+    decoder_upsampling = kwargs.get("decoder_upsampling", False)
+    net = SignalED_LSTM(
+        in_dim, out_dim, latent_dim, nblayers_encoder, nblayers_decoder,
+        nbfilters_encoder, nbfilters_decoder, batch_norm, encoder_downsampling,
+        decoder_upsampling)
+    meta_state_dict = {
+        "model_type": "imspec",
+        "in_dim": in_dim,
+        "out_dim": out_dim,
+        "latent_dim": latent_dim,
+        "nblayers_encoder": nblayers_encoder,
+        "nblayers_decoder": nblayers_decoder,
+        "nbfilters_encoder": nbfilters_encoder,
+        "nbfilters_decoder": nbfilters_decoder,
+        "batchnorm": batch_norm,
+        "encoder_downsampling": encoder_downsampling,
+        "decoder_upsampling": decoder_upsampling
+    }
+    return net, meta_state_dict
+##### EDIT FOR LSTM #####
 
 
 def init_VAE_nets(in_dim: Tuple[int],

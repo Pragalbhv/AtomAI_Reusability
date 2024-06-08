@@ -22,7 +22,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
 
 from atomai import losses_metrics
-from atomai.nets import (init_cls_model, init_fcnn_model, init_imspec_model,
+from atomai.nets import (init_cls_model, init_fcnn_model, init_imspec_model, init_imspec_model_lstm,
                          init_reg_model)
 from atomai.utils import (array2list, average_weights, gpu_usage_map,
                           init_cls_dataloaders, init_dataloaders,
@@ -301,10 +301,10 @@ class BaseTrainer:
                     running_acc_test += loss_[1]
                 c += 1
             print('Model (final state) evaluation loss:',
-                  np.around(running_loss_test / c, 4))
+                  np.around(running_loss_test / c, 6))
             if self.compute_accuracy:
                 print('Model (final state) accuracy:',
-                      np.around(running_acc_test / c, 4))
+                      np.around(running_acc_test / c, 6))
         else:
             running_loss_test, running_acc_test = 0, 0
             for idx in range(len(self.X_test)):
@@ -314,10 +314,10 @@ class BaseTrainer:
                 if self.compute_accuracy:
                     running_acc_test += loss_[1]
             print('Model (final state) evaluation loss:',
-                  np.around(running_loss_test / len(self.X_test), 4))
+                  np.around(running_loss_test / len(self.X_test), 6))
             if self.compute_accuracy:
                 print('Model (final state) accuracy:',
-                      np.around(running_acc_test / len(self.X_test), 4))
+                      np.around(running_acc_test / len(self.X_test), 6))
 
     def dataloader(self,
                    batch_num: int,
@@ -371,23 +371,23 @@ class BaseTrainer:
         if self.compute_accuracy:
             print('Epoch {}/{} ...'.format(e+1, self.training_cycles),
                   'Training loss: {} ...'.format(
-                      np.around(self.loss_acc["train_loss"][-1], 4)),
+                      np.around(self.loss_acc["train_loss"][-1], 6)),
                   'Test loss: {} ...'.format(
-                      np.around(self.loss_acc["test_loss"][-1], 4)),
+                      np.around(self.loss_acc["test_loss"][-1], 6)),
                   'Train {}: {} ...'.format(
                       accuracy_metrics,
-                      np.around(self.loss_acc["train_accuracy"][-1], 4)),
+                      np.around(self.loss_acc["train_accuracy"][-1], 6)),
                   'Test {}: {} ...'.format(
                       accuracy_metrics,
-                      np.around(self.loss_acc["test_accuracy"][-1], 4)),
+                      np.around(self.loss_acc["test_accuracy"][-1], 6)),
                   'GPU memory usage: {}/{}'.format(
                       gpu_usage[0], gpu_usage[1]))
         else:
             print('Epoch {}/{} ...'.format(e+1, self.training_cycles),
                   'Training loss: {} ...'.format(
-                      np.around(self.loss_acc["train_loss"][-1], 4)),
+                      np.around(self.loss_acc["train_loss"][-1], 6)),
                   'Test loss: {} ...'.format(
-                      np.around(self.loss_acc["test_loss"][-1], 4)),
+                      np.around(self.loss_acc["test_loss"][-1], 6)),
                   'GPU memory usage: {}/{}'.format(
                       gpu_usage[0], gpu_usage[1]))          
 
@@ -537,7 +537,7 @@ class BaseTrainer:
         ########################################### Start of Edit ##########################################            
         if self.ES and not self.swa:
             self.patience=kwargs.get("patience",self.training_cycles//10)
-            self.tolerance=kwargs.get("tolerance",1e-3)
+            self.tolerance=kwargs.get("tolerance",1e-5)
             self.min_val_loss=sys.float_info.max
             self.verbose=kwargs.get("verbose",False)
             self.ES_model=None #To store Early stoppng model eventually
@@ -561,13 +561,13 @@ class BaseTrainer:
             if optimizer is None:
                 # will be overwitten by lr_scheduler (if activated)
                 ########################################### Start of Edit #########################################
-                self.optimizer = torch.optim.Adam(params, lr=1e-3, weight_decay=self.reg)
+                self.optimizer = torch.optim.Adam(params, lr=5e-4, weight_decay=self.reg)
             else:
                 try:
-                    self.optimizer = optimizer(params,lr=1e-3, weight_decay=self.reg)
+                    self.optimizer = optimizer(params,lr=5e-4, weight_decay=self.reg)
                 except:
                     print("Optimizer does not support Weight decay")
-                    self.optimizer = optimizer(params,lr=1e-3)
+                    self.optimizer = optimizer(params,lr=5e-4)
                 #self.optimizer = optimizer(params)
             
             
@@ -610,7 +610,7 @@ class BaseTrainer:
         kwargs for utils.datatransform class to perform
         the data augmentation "on-the-fly"
         
-        EDITED: Implemnted Early stopping
+        EDITED: Implemented Early stopping
         """
         ########################################### Start of Edit ########################################## 
         
@@ -635,7 +635,7 @@ class BaseTrainer:
                 self.print_statistics(e)
             ########################################## Start of Edit ########################################## 
             if self.ES and not self.swa:
-                if self.min_val_loss-self.loss_acc["test_loss"][-1]>self.tolerance :
+                if self.loss_acc["test_loss"][-1] < self.min_val_loss :
                     self.min_val_loss=self.loss_acc["test_loss"][-1]
                     self.ES_model=copy.deepcopy(self.net) #making a deep copy of self.nn, on whatever device self.nn is
                     patience_used=0
@@ -669,9 +669,12 @@ class BaseTrainer:
             print("Performing stochastic weight averaging...")
             self.net.load_state_dict(average_weights(self.running_weights))
             self.eval_model()
+        if self.ES:
+            self.eval_model()
         if self.plot_training_history:
             plot_losses(self.loss_acc["train_loss"],
                         self.loss_acc["test_loss"])
+        
         return self.net
 
     def fit(self) -> None:
@@ -926,6 +929,128 @@ class ImSpecTrainer(BaseTrainer):
             raise AssertionError(
                 "The input/output dimensions of the model must match" +
                 " the height, width and length (for spectra) of training")
+
+##### EDIT FOR LSTM #####
+
+class ImSpecTrainerLSTM(BaseTrainer):
+    """
+    Trainer of neural network for image-to-spectrum
+    and spectrum-to-image transformations
+
+    Args:
+        in_dim:
+            Input data dimensions.
+            (height, width) for images or (length,) for spectra
+        out_dim:
+            output dimensions.
+            (length,) for spectra or (height, width) for images
+        latent_dim:
+            dimensionality of the latent space
+            (number of neurons in a fully connected bottleneck layer)
+        **seed (int):
+            Deterministic mode for model training (Default: 1)
+        **batch_seed (int):
+            Separate seed for generating a sequence of batches
+            for training/testing. Equal to 'seed' if set to None (default)
+        **nblayers_encoder (int):
+            number of convolutional layers in the encoder
+        **nblayers_decoder (int):
+            number of convolutional layers in the decoder
+        **nbfilters_encoder (int):
+            number of convolutional filters in each layer of the encoder
+        **nbfilters_decoder (int):
+            number of convolutional filters in each layer of the decoder
+        **batch_norm (bool):
+            Apply batch normalization after each convolutional layer
+            (Default: True)
+        **encoder_downsampling (int):
+            downsamples input data by this factor before passing
+            to convolutional layers (Default: no downsampling)
+        **decoder_upsampling (bool):
+            performs upsampling+convolution operation twice on the reshaped latent
+            vector (starting from image/spectra dims 4x smaller than the target dims)
+            before passing  to the decoder
+    """
+    def __init__(self,
+                 in_dim: Tuple[int],
+                 out_dim: Tuple[int],
+                 latent_dim: int = 2,
+                 **kwargs: Union[int, bool, str]) -> None:
+        super(ImSpecTrainerLSTM, self).__init__()
+        """
+        Initialize trainer's parameters
+        """
+        seed = kwargs.get("seed", 1)
+        kwargs["batch_seed"] = kwargs.get("batch_seed", seed)
+        set_train_rng(seed)
+
+        self.in_dim, self.out_dim = in_dim, out_dim
+        (self.net,
+         self.meta_state_dict) = init_imspec_model_lstm(in_dim, out_dim, latent_dim,
+                                                   **kwargs)
+
+        self.net.to(self.device)
+        self.meta_state_dict["weights"] = self.net.state_dict()
+        #self.meta_state_dict["optimizer"] = self.optimizer
+
+    def set_data(self,
+                 X_train: Union[np.ndarray, torch.Tensor],
+                 y_train: Union[np.ndarray, torch.Tensor],
+                 X_test: Optional[Union[np.ndarray, torch.Tensor]] = None,
+                 y_test: Optional[Union[np.ndarray, torch.Tensor]] = None,
+                 **kwargs: Union[float, int]) -> None:
+        """
+        Sets training and test data.
+
+        Args:
+            X_train:
+                4D numpy array or torch tensor with image data
+                (n_samples x 1 x height x width) or 3D array/tensor
+                with spectral data (n_samples x 1 x signal_length).
+                It is also possible to pass 3D and 2D arrays by ignoring
+                the channel dim of 1, which will be added automatically.
+                The X_train is typically referred to as 'features'
+            y_train:
+                3D numpy array or torch tensor with spectral data
+                (n_samples x 1 x signal_length) or 4D array/tensor with
+                image data (n_samples x 1 x height x width).
+                It is also possible to pass 2D and 3D arrays by ignoring
+                the channel dim of 1, which will be added automatically.
+                Note that if your X_train data are images,
+                then your y_train must be spectra and vice versa.
+                The y_train is typicaly referred to as "targets"
+            X_test:
+                Test data (features) of the same dimesnionality
+                (except for the number of samples) as X_train
+            y_test:
+                Test data (targets) of the same dimesnionality
+                (except for the number of samples) as y_train
+            kwargs:
+                Parameters for train_test_split ('test_size' and 'seed') when
+                separate test set is not provided and 'memory_alloc', which
+                sets a threshold (in GBs) for holding entire training data on GPU
+        """
+
+        if X_test is None or y_test is None:
+            X_train, X_test, y_train, y_test = train_test_split(
+                X_train, y_train, test_size=kwargs.get("test_size", .15),
+                shuffle=True, random_state=kwargs.get("seed", 1))
+
+        if self.full_epoch:
+            self.train_loader, self.test_loader, dims = init_imspec_dataloaders(
+                X_train, y_train, X_test, y_test,
+                self.batch_size, kwargs.get("memory_alloc", 4))
+        else:
+            (self.X_train, self.y_train,
+             self.X_test, self.y_test, dims) = preprocess_training_imspec_data(
+                X_train, y_train, X_test, y_test,
+                self.batch_size, kwargs.get("memory_alloc", 4))
+
+        if dims[0] != self.in_dim or dims[1] != self.out_dim:
+            raise AssertionError(
+                "The input/output dimensions of the model must match" +
+                " the height, width and length (for spectra) of training")
+##### EDIT FOR LSTM #####
 
 
 class RegTrainer(BaseTrainer):
