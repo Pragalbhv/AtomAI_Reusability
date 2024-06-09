@@ -9,6 +9,11 @@
 ## Example 3: Instance Segmentation: Additive Manufacturing dataset (Au/CdSe/Combined) demo
 ![Implementation of Semantic Segmentation from Semantic Segmentation maps for optical micrographs of Additive manufacturing dataset]([https://github.com/Pragalbhv/atomai/blob/master/examples/notebooks/EarlyStopping_HRTEM_pv.ipynb](https://github.com/Pragalbhv/atomai/blob/master/examples/notebooks/Instance_Segmentation.ipynb))
 
+## Example 4: ImSpec demo
+![Implementation of Updated Demo for ImSpec on the STEM EELS dataset using Early Stopping and LSTM Decoder](https://github.com/Hitesh1309/atomai/blob/master/examples/notebooks/LSTM_EarlyStopping_ImSpec.ipynb)
+
+## Example 5: Mat2Spec demo
+![Implementation of the modified Mat2Spec for ImSpec on the STEM EELS dataset](https://github.com/Hitesh1309/atomai/blob/master/examples/notebooks/Mat2Spec_ImSpec.ipynb)
 
 ### The following configurations were used for training
 The parameters like training cycles, patience, and the number of augmented images created are modified so as to run in a Google colab notebook without any premium resources. 
@@ -25,6 +30,7 @@ The additive manufacturing dataset can be obtained ![here.](https://drive.google
   - LBFO: C. Nelson, A. Ghosh, M. Ziatdinov and S. Kalinin V, (Zenodo, 2021).
   - Au &CdSe: Groschner, C., Choi, C., & Scott, M. (2021). Machine Learning Pipeline for Segmentation and Defect Identification from High-Resolution Transmission Electron Microscopy Data. Microscopy and Microanalysis, 27(3), 549-556. doi:10.1017/S1431927621000386
   - Additive Manufacturing Dataset: Can be provided upon request to the authors.
+  - STEM-EELS: Roccapriore, Kevin M. and Ziatdinov, Maxim and Cho, Shin Hum and Hachtel, Jordan A. and Kalinin, Sergei V. (2021). Predictability of Localized Plasmonic Responses in Nanoparticle Assemblies. doi:10.1002/smll.202100181
 
 
   
