@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/698535974.svg)](https://doi.org/10.5281/zenodo.14050016)
+
 # AtomAI: Reusability
 
 [**Original AtomAI repository (up to date)**](https://github.com/pycroscopy/atomai)
