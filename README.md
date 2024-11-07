@@ -51,7 +51,7 @@ The following files are the main files contributed by this work, the path of the
 [Implementation of Updated Demo for ImSpec on the STEM EELS dataset using Early Stopping and LSTM Decoder](https://github.com/Pragalbhv/AtomAI_Reusability/blob/master/examples/notebooks/LSTM_EarlyStopping_ImSpec.ipynb)
 
 ## Example 5: Mat2Spec demo
-[Implementation of the modified Mat2Spec for ImSpec on the STEM EELS dataset]([https://github.com/Hitesh1309/atomai/blob/master/examples/notebooks](https://github.com/Pragalbhv/AtomAI_Reusability/blob/master/examples/notebooks/Mat2Spec_ImSpec.ipynb)
+[Implementation of the modified Mat2Spec for ImSpec on the STEM EELS dataset](https://github.com/Pragalbhv/AtomAI_Reusability/blob/master/examples/notebooks/Mat2Spec_ImSpec.ipynb)
 
 ### The following configurations were used for training
 The parameters like training cycles, patience, and the number of augmented images created are modified so as to run in a Google Colab notebook without any premium resources. 
