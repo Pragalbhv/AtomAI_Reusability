@@ -57,9 +57,9 @@ The following files are the main files contributed by this work, the path of the
 The parameters like training cycles, patience, and the number of augmented images created are modified so as to run in a Google Colab notebook without any premium resources. 
 The training cycles were set to 5000 and patience to 500, and the number of images produced was ~ 2500.
 
-One only needs to run the Colab notebooks as is. However, if one wants to test it on a personal machine, they can download the necessary datafiles for Example 1 and 2 ![here.](https://drive.google.com/drive/folders/1S6pfS0t-rJ9U4EvNl0J3bB5wolJ9yRIt?usp=sharing)
+One only needs to run the Colab notebooks as is. However, if one wants to test it on a personal machine, they can download the necessary datafiles for Example 1 and 2 [here.](https://drive.google.com/drive/folders/1S6pfS0t-rJ9U4EvNl0J3bB5wolJ9yRIt?usp=sharing)
 
-The additive manufacturing dataset can be obtained ![here.](https://drive.google.com/file/d/1s2_9Mmha7q6CcM5LRTyE1EbpbEE4Er5k/view?usp=drive_link)
+The additive manufacturing dataset can be obtained [here.](https://drive.google.com/file/d/1s2_9Mmha7q6CcM5LRTyE1EbpbEE4Er5k/view?usp=drive_link)
 
 
 
