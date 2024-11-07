@@ -7,13 +7,13 @@
 [Implementation of Updated DCNN equipped with Early stopping and automatic-binary-thresholding for Nano-particle Segmentation](https://github.com/Pragalbhv/atomai/blob/master/examples/notebooks/EarlyStopping_HRTEM_pv.ipynb)
 
 ## Example 3: Instance Segmentation: Additive Manufacturing dataset (Au/CdSe/Combined) demo
-![Implementation of Semantic Segmentation from Semantic Segmentation maps for optical micrographs of Additive manufacturing dataset](https://github.com/Pragalbhv/atomai/blob/master/examples/notebooks/Instance_Segmentation.ipynb)
+[Implementation of Semantic Segmentation from Semantic Segmentation maps for optical micrographs of Additive manufacturing dataset](https://github.com/Pragalbhv/atomai/blob/master/examples/notebooks/Instance_Segmentation.ipynb)
 
 ## Example 4: ImSpec demo
-![Implementation of Updated Demo for ImSpec on the STEM EELS dataset using Early Stopping and LSTM Decoder](https://github.com/Pragalbhv/atomai/blob/master/examples/notebooks/LSTM_EarlyStopping_ImSpec.ipynb)
+[Implementation of Updated Demo for ImSpec on the STEM EELS dataset using Early Stopping and LSTM Decoder](https://github.com/Pragalbhv/atomai/blob/master/examples/notebooks/LSTM_EarlyStopping_ImSpec.ipynb)
 
 ## Example 5: Mat2Spec demo
-![Implementation of the modified Mat2Spec for ImSpec on the STEM EELS dataset](https://github.com/Pragalbhv/atomai/blob/master/examples/notebooks/Mat2Spec_ImSpec.ipynb)
+[Implementation of the modified Mat2Spec for ImSpec on the STEM EELS dataset](https://github.com/Pragalbhv/atomai/blob/master/examples/notebooks/Mat2Spec_ImSpec.ipynb)
 
 ### The following configurations were used for training
 The parameters like training cycles, patience, and the number of augmented images created are modified so as to run in a Google colab notebook without any premium resources. 
