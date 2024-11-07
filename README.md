@@ -1,6 +1,7 @@
 # AtomAI: Reusability
 
 [**Original AtomAI repository (up to date)**](https://github.com/pycroscopy/atomai).
+
 [**Original AtomAI repository (fork used)**](https://github.com/pycroscopy/atomai/tree/657ee4f0ea0efaeeb541cf0c5b76377a64a72f06)
 
 ## Files contributed
