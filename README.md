@@ -63,6 +63,8 @@ One only needs to run the Colab notebooks as is. However, if one wants to test i
 
 The additive manufacturing dataset can be obtained [here.](https://drive.google.com/file/d/1s2_9Mmha7q6CcM5LRTyE1EbpbEE4Er5k/view?usp=drive_link)
 
+The STEM Images can be downloaded [here](https://drive.usercontent.google.com/download?id=1BprChho_y-LdVQstR1vYzCxmK677algR)
+
 
 
 
