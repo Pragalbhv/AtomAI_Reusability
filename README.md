@@ -19,12 +19,12 @@ The following files are the main files contributed by this work, the path of the
 - atomai/models/imspec.py: "ImSpecTrainerLSTM introduced" 
 
 - Mat2Spec/
-	- Mat2Spec/Mat2Spec.py
-	- Mat2Spec/SinkhornDistance.py
-	- Mat2Spec/data.py
-	- Mat2Spec/file_setter.py
-	- Mat2Spec/pytorch_stats_loss.py
-	- Mat2Spec/utils.py
+	- Mat2Spec/Mat2Spec.py: "CNN and VAE modules for spectral data analysis"
+	- Mat2Spec/SinkhornDistance.py: "Sinkhorn distance implementation"
+	- Mat2Spec/data.py: "Data loading with encoding and clustering"
+	- Mat2Spec/file_setter.py: "Dataset preparation based on input property and source"
+	- Mat2Spec/pytorch_stats_loss.py: "Implementation of differentiable statistical distance losses" 
+	- Mat2Spec/utils.py: "Utility functions for training, evaluation, and model handling"
 
 - examples/
 	- examples/notebooks/EarlyStopping_HRTEM_pv.ipynb
